@@ -1,0 +1,26 @@
+# Production overrides: publish only the gateway (443, and 80 for the HTTPS redirect).
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# Also set ENVIRONMENT-specific values in .env: strong unique DB_PASSWORD and REDIS_PASSWORD,
+# BOOTSTRAP_ADMIN_PASSWORD (or use `api-server make-admin`), CORS_ALLOWED_ORIGINS, APP_BASE_URL,
+# real SMTP settings and, if needed, TURN_*. Vault should use auto-unseal (see DEPLOYMENT.md).
+services:
+  postgres:
+    ports: !reset []
+  redis:
+    ports: !reset []
+  kafka:
+    ports: !reset []
+  vault:
+    ports: !reset []
+  mailpit:
+    ports: !reset []
+    profiles: ["dev"]   # not started in production
+  postfix:
+    environment:
+      MAIL_COPY_TO: ""  # no copies of outgoing mail (they contain reset links)
+  api-server:
+    environment:
+      ENVIRONMENT: production
+      LOG_LEVEL: info
+      APP_BASE_URL: ${APP_BASE_URL:?Set APP_BASE_URL in .env}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?Set CORS_ALLOWED_ORIGINS in .env}

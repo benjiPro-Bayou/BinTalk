@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BinTalk · Where your company talks</title>
+  <meta name="description" content="BinTalk: secure channels, groups, direct messages and calls for your company.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <!-- Icons (Feather, MIT). Used as <svg class="ic"><use href="#i-name"/></svg>. -->
+  <svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true">
+    <symbol id="i-hash" viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+    <symbol id="i-video" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol>
+    <symbol id="i-clip" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
+    <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.78 7.78 5.5 5.5 0 0 1 7.78-7.78zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
+  </svg>
+
+  <!-- ================= Landing page ================= -->
+  <div id="landing-view" class="landing" hidden>
+    <header class="landing-nav">
+      <a class="logo" href="#top" aria-label="BinTalk home"><span class="logo-mark">B</span>BinTalk</a>
+      <nav class="landing-links">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <button type="button" class="link-btn" data-open="checkout">Renew / complete payment</button>
+      </nav>
+      <div class="landing-cta">
+        <button type="button" class="ghost" data-open="login">Sign in</button>
+        <button type="button" class="primary" data-open="signup">Get started</button>
+      </div>
+    </header>
+
+    <section class="hero" id="top">
+      <div class="hero-text">
+        <span class="eyebrow">Team messaging for companies</span>
+        <h1>Where your company<br><span class="gradient-text">talks, decides and ships.</span></h1>
+        <p class="hero-sub">Channels for every team, private groups for every project and direct messages for everything else, all in one secure workspace that only your company can see.</p>
+        <div class="hero-actions">
+          <button type="button" class="primary large" data-open="signup">Create your workspace</button>
+          <a class="ghost large" href="#pricing">See pricing</a>
+        </div>
+        <ul class="hero-points">
+          <li><svg class="ic"><use href="#i-check"/></svg>Private to your company</li>
+          <li><svg class="ic"><use href="#i-check"/></svg>Encrypted at rest</li>
+          <li><svg class="ic"><use href="#i-check"/></svg>Pay with Telebirr, CBE Birr or card</li>
+        </ul>
+      </div>
+      <div class="hero-shot" aria-hidden="true">
+        <div class="shot-window">
+          <div class="shot-side">
+            <div class="shot-ws">Acme Inc. <svg class="ic"><use href="#i-chevron"/></svg></div>
+            <div class="shot-label">Channels</div>
+            <div class="shot-item active"><svg class="ic"><use href="#i-hash"/></svg>general</div>
+            <div class="shot-item"><svg class="ic"><use href="#i-hash"/></svg>announcements</div>
+            <div class="shot-item bold"><svg class="ic"><use href="#i-hash"/></svg>design<span class="shot-badge">3</span></div>
+            <div class="shot-label">Groups</div>
+            <div class="shot-item"><svg class="ic"><use href="#i-lock"/></svg>launch-team</div>
+            <div class="shot-label">Direct messages</div>
+            <div class="shot-item"><span class="shot-dot on"></span>Hanna Tesfaye</div>
+            <div class="shot-item"><span class="shot-dot"></span>Dawit Bekele</div>
+          </div>
+          <div class="shot-main">
+            <div class="shot-head"><svg class="ic"><use href="#i-hash"/></svg>general</div>
+            <div class="shot-msg"><span class="shot-av a1">HT</span><div><b>Hanna Tesfaye</b> <small>9:41</small><p>The new release is live 🎉 thanks everyone!</p></div></div>
+            <div class="shot-msg"><span class="shot-av a2">DB</span><div><b>Dawit Bekele</b> <small>9:43</small><p>Great work. Demo for the board at 3pm in <span class="shot-link">#design</span>.</p></div></div>
+            <div class="shot-msg"><span class="shot-av a3">SM</span><div><b>Sara Mekonnen</b> <small>9:44</small><p>📎 roadmap-q4.pdf</p></div></div>
+            <div class="shot-input">Message #general</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features" id="features">
+      <h2>Everything your team needs to stay in sync</h2>
+      <div class="feature-grid">
+        <article class="feature"><span class="feature-icon c1"><svg class="ic"><use href="#i-hash"/></svg></span><h3>Channels</h3><p>Open conversations for teams and topics that anyone in your company can find and join.</p></article>
+        <article class="feature"><span class="feature-icon c2"><svg class="ic"><use href="#i-lock"/></svg></span><h3>Private groups</h3><p>Invite-only groups for projects, leadership or anything that needs a smaller room.</p></article>
+        <article class="feature"><span class="feature-icon c3"><svg class="ic"><use href="#i-user"/></svg></span><h3>Direct messages</h3><p>One-to-one conversations with read receipts, mentions and threads.</p></article>
+        <article class="feature"><span class="feature-icon c4"><svg class="ic"><use href="#i-video"/></svg></span><h3>Voice &amp; video calls</h3><p>Call a colleague or the whole group, share your screen, straight from the browser.</p></article>
+        <article class="feature"><span class="feature-icon c5"><svg class="ic"><use href="#i-file"/></svg></span><h3>Files &amp; media</h3><p>Share documents, images, audio and video, stored encrypted.</p></article>
+        <article class="feature"><span class="feature-icon c6"><svg class="ic"><use href="#i-shield"/></svg></span><h3>Your company only</h3><p>Every workspace is isolated. People can only see and message colleagues from their own company.</p></article>
+      </div>
+    </section>
+
+    <section class="pricing" id="pricing">
+      <h2>Simple plans for every team size</h2>
+      <p class="muted center">Pay monthly, or yearly and save. Prices in Ethiopian Birr.</p>
+      <div class="cycle-toggle" role="radiogroup" aria-label="Billing cycle">
+        <button type="button" class="cycle active" data-cycle="monthly" role="radio" aria-checked="true">Monthly</button>
+        <button type="button" class="cycle" data-cycle="yearly" role="radio" aria-checked="false">Yearly</button>
+      </div>
+      <div id="plan-grid" class="plan-grid"><p class="muted center">Loading plans…</p></div>
+    </section>
+
+    <footer class="landing-footer">
+      <span class="logo small"><span class="logo-mark">B</span>BinTalk</span>
+      <span class="muted small">© <span id="year"></span> BinTalk · Encrypted team messaging</span>
+    </footer>
+  </div>
+
+  <!-- ================= Sign in, sign-up, invitations, payments ================= -->
+  <main id="auth-view" class="auth" hidden>
+    <button type="button" class="auth-home ghost" id="auth-home"><svg class="ic"><use href="#i-back"/></svg> Home</button>
+    <div class="auth-card">
+      <a class="logo" href="#top" id="auth-logo"><span class="logo-mark">B</span>BinTalk</a>
+      <h1 id="auth-title" class="auth-title">Sign in to your workspace</h1>
+      <p id="auth-subtitle" class="muted auth-subtitle"></p>
+
+      <form id="login-form" class="form">
+        <label>Work email <input name="email" type="email" autocomplete="email" required></label>
+        <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+        <button class="primary" type="submit">Sign in</button>
+        <button type="button" class="link-btn" id="forgot-link">Forgot password?</button>
+        <p class="muted small center">New here? <button type="button" class="link-btn inline" data-open="signup">Create a workspace</button> or use the invitation link from your company.</p>
+      </form>
+
+      <form id="signup-form" class="form" hidden>
+        <div class="form-step-title"><span class="step-num">1</span> Your company</div>
+        <label>Company name <input name="company_name" maxlength="150" required></label>
+        <div class="form-row">
+          <label>Plan <select name="plan_code" id="signup-plan" required></select></label>
+          <label>Billing <select name="billing_cycle" id="signup-cycle">
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select></label>
+        </div>
+        <label>Phone for payment (optional) <input name="phone" inputmode="numeric" pattern="0[79][0-9]{8}" placeholder="09xxxxxxxx" maxlength="10"></label>
+        <div class="form-step-title"><span class="step-num">2</span> Your account (workspace owner)</div>
+        <div class="form-row">
+          <label>Full name <input name="full_name" autocomplete="name" required></label>
+          <label>Username <input name="username" autocomplete="username" minlength="3" maxlength="50" pattern="[A-Za-z0-9_.\-]{3,50}" required></label>
+        </div>
+        <label>Work email <input name="email" type="email" autocomplete="email" required></label>
+        <label>Password <input name="password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required></label>
+        <p id="signup-total" class="signup-total"></p>
+        <button class="primary" type="submit">Continue to payment</button>
+        <p class="muted small center">Already have a workspace? <button type="button" class="link-btn inline" data-open="login">Sign in</button></p>
+      </form>
+
+      <form id="invite-form" class="form" hidden>
+        <label>Email <input name="email" type="email" readonly></label>
+        <div class="form-row">
+          <label>Full name <input name="full_name" autocomplete="name" required></label>
+          <label>Username <input name="username" autocomplete="username" minlength="3" maxlength="50" pattern="[A-Za-z0-9_.\-]{3,50}" required></label>
+        </div>
+        <label>Password <input name="password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required></label>
+        <button class="primary" type="submit">Join workspace</button>
+      </form>
+
+      <form id="checkout-form" class="form" hidden>
+        <p class="muted small">Workspace owners: sign in to finish an interrupted payment or renew an expired subscription.</p>
+        <label>Owner email <input name="email" type="email" autocomplete="email" required></label>
+        <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+        <div class="form-row">
+          <label>Plan <select name="plan_code" id="checkout-plan"></select></label>
+          <label>Billing <select name="billing_cycle">
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select></label>
+        </div>
+        <button class="primary" type="submit">Continue to payment</button>
+      </form>
+
+      <div id="payment-panel" class="payment-panel" hidden>
+        <div id="payment-icon" class="payment-icon"></div>
+        <p id="payment-text"></p>
+        <button type="button" class="primary" id="payment-signin" data-open="login" hidden>Sign in</button>
+        <button type="button" class="ghost" id="payment-retry" hidden>Check again</button>
+      </div>
+
+      <form id="forgot-form" class="form" hidden>
+        <p class="muted small">Enter your account's email and we'll send you a link to choose a new password.</p>
+        <label>Email <input name="email" type="email" autocomplete="email" required></label>
+        <button class="primary" type="submit">Send reset link</button>
+        <button type="button" class="link-btn back-to-login">← Back to sign in</button>
+      </form>
+
+      <form id="reset-form" class="form" hidden>
+        <p class="muted small">Choose a new password for your account.</p>
+        <label>New password <input name="new_password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required></label>
+        <label>Confirm new password <input name="confirm" type="password" autocomplete="new-password" minlength="8" maxlength="72" required></label>
+        <button class="primary" type="submit">Set new password</button>
+        <button type="button" class="link-btn back-to-login">← Back to sign in</button>
+      </form>
+
+      <p id="auth-info" class="info" role="status" hidden></p>
+      <p id="auth-error" class="error" role="alert" hidden></p>
+    </div>
+  </main>
+
+  <!-- Forced password change (temporary password set by an admin) -->
+  <main id="password-view" class="auth" hidden>
+    <div class="auth-card">
+      <span class="logo"><span class="logo-mark">B</span>BinTalk</span>
+      <h1 class="auth-title">Set a new password</h1>
+      <p class="muted auth-subtitle">You signed in with a temporary password. Choose your own to continue.</p>
+      <form id="force-change-form" class="form">
+        <label id="force-current-label">Temporary password <input name="old_password" type="password" autocomplete="current-password" required></label>
+        <label>New password <input name="new_password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required></label>
+        <label>Confirm new password <input name="confirm" type="password" autocomplete="new-password" minlength="8" maxlength="72" required></label>
+        <button class="primary" type="submit">Save and continue</button>
+        <button type="button" class="link-btn" id="force-signout">Sign out</button>
+      </form>
+      <p id="password-error" class="error" role="alert" hidden></p>
+    </div>
+  </main>
+
+  <!-- ================= Workspace ================= -->
+  <div id="app-view" class="app" hidden>
+    <header class="topbar">
+      <div class="topbar-left">
+        <button id="back-btn" class="icon-btn back-btn" type="button" aria-label="Back to conversations"><svg class="ic"><use href="#i-back"/></svg></button>
+      </div>
+      <div class="search">
+        <svg class="ic search-ic"><use href="#i-search"/></svg>
+        <input id="search-input" type="search" placeholder="Search people" autocomplete="off" aria-label="Search people">
+        <ul id="search-results" class="list search-results" hidden></ul>
+      </div>
+      <div class="topbar-right">
+        <button id="admin-btn" class="topbar-btn" type="button" hidden><svg class="ic"><use href="#i-sliders"/></svg><span>Admin</span><span id="admin-badge" class="badge" hidden></span></button>
+        <div class="account-menu-wrap">
+          <button id="account-btn" class="me-btn" type="button" aria-haspopup="menu" aria-expanded="false" title="Your status and account">
+            <span class="avatar-wrap">
+              <span id="me-avatar" class="avatar"></span>
+              <span id="me-presence" class="presence-dot" data-status="offline"></span>
+            </span>
+          </button>
+          <div id="account-menu" class="context-menu account-menu" role="menu" hidden>
+            <div class="menu-heading">
+              <div id="menu-name" class="me-name"></div>
+              <div id="menu-username" class="muted small"></div>
+              <div id="me-status" class="me-status small">Offline</div>
+            </div>
+            <div class="menu-label">Status</div>
+            <button type="button" class="status-option" role="menuitemradio" data-pref="auto">
+              <span class="presence-dot" data-status="active"></span>
+              <span class="status-text"><span>Active</span><span class="muted small">Away automatically after 10 min idle</span></span>
+            </button>
+            <button type="button" class="status-option" role="menuitemradio" data-pref="away">
+              <span class="presence-dot" data-status="away"></span>
+              <span class="status-text"><span>Away</span></span>
+            </button>
+            <button type="button" class="status-option" role="menuitemradio" data-pref="offline">
+              <span class="presence-dot" data-status="offline"></span>
+              <span class="status-text"><span>Offline</span><span class="muted small">Appear offline to everyone</span></span>
+            </button>
+            <hr class="menu-sep">
+            <button id="change-password-btn" type="button" role="menuitem" class="menu-icon-item"><svg class="ic"><use href="#i-key"/></svg>Change password</button>
+            <button id="status-btn" type="button" role="menuitem" class="menu-icon-item"><svg class="ic"><use href="#i-shield"/></svg>Encryption status</button>
+            <hr class="menu-sep">
+            <button id="menu-logout-btn" type="button" role="menuitem" class="danger menu-icon-item"><svg class="ic"><use href="#i-logout"/></svg>Sign out</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <header class="ws-header">
+        <div class="ws-name-wrap">
+          <div id="ws-name" class="ws-name"></div>
+          <div id="ws-plan" class="ws-plan"></div>
+        </div>
+        <button id="new-dm-btn" class="ws-compose" type="button" title="New message" aria-label="New message"><svg class="ic"><use href="#i-message"/></svg></button>
+      </header>
+      <nav class="sidebar-scroll" aria-label="Conversations">
+        <section class="side-section" data-section="channels">
+          <div class="section-head">
+            <button type="button" class="section-toggle" aria-expanded="true"><svg class="ic caret"><use href="#i-chevron"/></svg><svg class="ic"><use href="#i-hash"/></svg><span>Channels</span></button>
+            <button type="button" class="section-add" id="browse-channels-btn" title="Browse or create channels" aria-label="Browse or create channels"><svg class="ic"><use href="#i-plus"/></svg></button>
+          </div>
+          <ul id="channel-list" class="list side-list"></ul>
+        </section>
+        <section class="side-section" data-section="groups">
+          <div class="section-head">
+            <button type="button" class="section-toggle" aria-expanded="true"><svg class="ic caret"><use href="#i-chevron"/></svg><svg class="ic"><use href="#i-lock"/></svg><span>Groups</span></button>
+            <button type="button" class="section-add" id="new-group-btn" title="Create a private group" aria-label="Create a private group"><svg class="ic"><use href="#i-plus"/></svg></button>
+          </div>
+          <ul id="group-list" class="list side-list"></ul>
+        </section>
+        <section class="side-section" data-section="dms">
+          <div class="section-head">
+            <button type="button" class="section-toggle" aria-expanded="true"><svg class="ic caret"><use href="#i-chevron"/></svg><svg class="ic"><use href="#i-user"/></svg><span>Direct messages</span></button>
+            <button type="button" class="section-add" id="new-dm-btn-2" title="New direct message" aria-label="New direct message"><svg class="ic"><use href="#i-plus"/></svg></button>
+          </div>
+          <ul id="dm-list" class="list side-list"></ul>
+        </section>
+        <p id="chat-list-empty" class="empty-hint" hidden>No conversations yet. Browse channels or message a colleague to get started.</p>
+      </nav>
+    </aside>
+
+    <section class="chat" id="chat-pane">
+      <div id="chat-empty" class="chat-empty">
+        <div class="empty-art"><svg class="ic"><use href="#i-message"/></svg></div>
+        <h2 id="welcome-title">Welcome</h2>
+        <p class="muted">Pick a channel, a group or a colleague on the left, or start something new.</p>
+        <div class="empty-actions">
+          <button type="button" class="ghost-btn" id="empty-browse"><svg class="ic"><use href="#i-hash"/></svg>Browse channels</button>
+          <button type="button" class="ghost-btn" id="empty-group"><svg class="ic"><use href="#i-lock"/></svg>Create a group</button>
+          <button type="button" class="ghost-btn" id="empty-dm"><svg class="ic"><use href="#i-user"/></svg>Message someone</button>
+        </div>
+      </div>
+
+      <div id="chat-active" class="chat-active" hidden>
+        <header class="chat-header">
+          <span id="chat-icon" class="chat-icon"></span>
+          <div class="chat-title">
+            <div id="chat-name" class="chat-name"></div>
+            <div id="chat-subtitle" class="muted small"></div>
+          </div>
+          <div class="chat-actions">
+            <button id="voice-call-btn" class="icon-btn call-btn" type="button" title="Voice call" aria-label="Voice call"><svg class="ic"><use href="#i-phone"/></svg></button>
+            <button id="video-call-btn" class="icon-btn call-btn" type="button" title="Video call" aria-label="Video call"><svg class="ic"><use href="#i-video"/></svg></button>
+            <button id="members-btn" class="pill-btn" type="button" hidden><svg class="ic"><use href="#i-users"/></svg><span id="members-count"></span></button>
+            <button id="leave-btn" class="icon-btn" type="button" title="Leave" aria-label="Leave" hidden><svg class="ic"><use href="#i-logout"/></svg></button>
+          </div>
+        </header>
+
+        <div id="call-banner" class="call-banner" hidden></div>
+
+        <div class="messages-wrap">
+          <div id="messages" class="messages" aria-live="polite"></div>
+          <button id="jump-new" class="jump-new" type="button" hidden>↓ New messages</button>
+        </div>
+
+        <div id="main-composer"></div>
+      </div>
+    </section>
+
+    <aside id="thread-pane" class="thread-pane" hidden aria-label="Thread">
+      <header class="chat-header">
+        <div class="chat-title">
+          <div class="chat-name">Thread</div>
+          <div id="thread-subtitle" class="muted small"></div>
+        </div>
+        <button id="thread-close" class="icon-btn" type="button" aria-label="Close thread"><svg class="ic"><use href="#i-x"/></svg></button>
+      </header>
+      <div class="messages-wrap">
+        <div id="thread-messages" class="messages" aria-live="polite"></div>
+      </div>
+      <div id="thread-composer"></div>
+    </aside>
+  </div>
+
+  <!-- Incoming call -->
+  <div id="incoming-call" class="incoming-call" role="alertdialog" aria-live="assertive" hidden>
+    <div class="avatar incoming-avatar" id="incoming-avatar"></div>
+    <div class="incoming-text">
+      <div id="incoming-title" class="incoming-title"></div>
+      <div id="incoming-subtitle" class="muted small"></div>
+    </div>
+    <div class="incoming-actions">
+      <button id="incoming-decline" class="round-btn decline" title="Decline" aria-label="Decline">✕</button>
+      <button id="incoming-accept-audio" class="round-btn accept" title="Answer with audio" aria-label="Answer with audio">📞</button>
+      <button id="incoming-accept-video" class="round-btn accept" title="Answer with video" aria-label="Answer with video">🎥</button>
+    </div>
+  </div>
+
+  <!-- Active call -->
+  <div id="call-view" class="call-view" hidden>
+    <header class="call-header">
+      <div>
+        <div id="call-title" class="call-title"></div>
+        <div id="call-status" class="call-status"></div>
+      </div>
+      <div class="call-header-actions">
+        <span id="call-e2e" class="call-badge" title="Audio and video go directly between participants (peer-to-peer, encrypted with DTLS-SRTP)">🔒 Peer-to-peer</span>
+      </div>
+    </header>
+    <div id="call-grid" class="call-grid"></div>
+    <footer class="call-controls">
+      <button id="call-mute" class="round-btn" title="Mute microphone" aria-label="Mute microphone">🎤</button>
+      <button id="call-camera" class="round-btn" title="Turn camera off" aria-label="Turn camera off">📷</button>
+      <button id="call-screen" class="round-btn" title="Share your screen" aria-label="Share your screen">🖥</button>
+      <button id="call-hangup" class="round-btn decline" title="Hang up" aria-label="Hang up">✕</button>
+    </footer>
+  </div>
+
+  <!-- Admin console -->
+  <div id="admin-view" class="admin" hidden>
+    <aside class="admin-side">
+      <button id="admin-back" class="admin-back" type="button"><svg class="ic"><use href="#i-back"/></svg>Back to workspace</button>
+      <div class="admin-side-title" id="admin-scope-title">Admin</div>
+      <nav id="admin-tabs" class="admin-tabs" role="tablist"></nav>
+    </aside>
+    <main class="admin-main">
+      <header class="admin-header">
+        <h1 id="admin-heading">Admin</h1>
+        <span class="muted small" id="admin-whoami"></span>
+      </header>
+      <section id="admin-content" class="admin-content"></section>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <header class="modal-header">
+        <h2 id="modal-title"></h2>
+        <button id="modal-close" class="icon-btn" type="button" aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button>
+      </header>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>

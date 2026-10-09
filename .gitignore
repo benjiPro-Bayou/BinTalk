@@ -1,0 +1,124 @@
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+.gradle/
+local.properties
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.production.local
+
+# Build artifacts
+bin/
+out/
+build/
+dist/
+*.o
+*.a
+*.so
+*.dylib
+
+# Go specific
+vendor/
+*.exe
+*.dll
+*.so
+*.dylib
+go.test.out
+
+# Node/npm specific
+node_modules/
+package-lock.json
+yarn.lock
+dist/
+build/
+
+# React Native specific
+android/app/debug/
+android/app/release/
+ios/Pods/
+ios/Podfile.lock
+.gradle/
+.watchman*
+
+# Certificates and keys (NEVER commit!)
+*.crt
+*.key
+*.pem
+*.p12
+*.pfx
+certs/
+keys/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/
+postgres_data/
+
+# Vault data
+vault/data/
+unseal_keys.txt
+vault_token.txt
+
+# Docker volumes
+.docker/
+volumes/
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/
+temp/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE metadata
+.classpath
+.project
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# macOS
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Sensitive data
+.secrets/
+secrets/
+private/
+sensitive_data.json
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+junit.xml
+
+# Misc
+.cache/
+.DS_Store
+*.bak
+
+# Local notes
+Claude conversation*.txt

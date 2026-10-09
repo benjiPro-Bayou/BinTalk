@@ -1,0 +1,243 @@
+# Development stack. Secrets come from .env (see .env.example); infrastructure ports are bound to
+# 127.0.0.1 only, and the API is reached through the gateway on 443. For production add
+# docker-compose.prod.yml, which publishes nothing but the gateway:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: bintalk_postgres
+    environment:
+      POSTGRES_USER: bintalk
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      POSTGRES_DB: bintalk_db
+    ports:
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bintalk"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bintalk_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: bintalk_redis
+    ports:
+      - "127.0.0.1:${REDIS_HOST_PORT:-6379}:6379"
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      # REDISCLI_AUTH authenticates; without it PING gets NOAUTH.
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bintalk_network
+
+  # Zookeeper for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: bintalk_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - bintalk_network
+
+  # Apache Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: bintalk_kafka
+    ports:
+      - "127.0.0.1:9092:9092"
+      - "127.0.0.1:29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      - zookeeper
+    networks:
+      - bintalk_network
+    # After an unclean shutdown ZooKeeper briefly still holds the old broker registration and
+    # Kafka exits with NodeExists; retrying once the stale session expires (~20s) fixes it.
+    restart: unless-stopped
+
+  # HashiCorp Vault (server mode, persistent file storage, auto-unsealed by vault/bootstrap.sh)
+  vault:
+    image: hashicorp/vault:1.20
+    container_name: bintalk_vault
+    ports:
+      - "127.0.0.1:8200:8200"
+    environment:
+      VAULT_ADDR: "http://127.0.0.1:8200"
+    entrypoint: ["/bin/sh", "/vault/bootstrap.sh"]
+    volumes:
+      - vault_data:/vault/data          # encrypted Vault storage: back this up, losing it loses all keys
+      - vault_keys:/vault/keys          # unseal key + root token (development only)
+      - vault_app_token:/vault/app-token # the API's token (policy bintalk-api), written by bootstrap.sh
+      - ./vault/config.hcl:/vault/config/config.hcl:ro
+      - ./vault/bootstrap.sh:/vault/bootstrap.sh:ro
+      - ./vault/policy.hcl:/vault/policy.hcl:ro
+    cap_add:
+      - IPC_LOCK
+    restart: unless-stopped
+    networks:
+      - bintalk_network
+    healthcheck:
+      # Healthy once unsealed and the API token has been written.
+      test: ["CMD-SHELL", "vault status >/dev/null && test -s /vault/app-token/token"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  # Local mail server: Postfix + DKIM, delivers directly to recipients' mail servers (port 25 out).
+  # Every email is also copied to Mailpit so you can see what was sent.
+  postfix:
+    build: ./mail
+    image: bintalk-postfix
+    container_name: bintalk_postfix
+    environment:
+      MAIL_DOMAIN: ${MAIL_DOMAIN:-bintalk.local}
+      MAIL_HOSTNAME: ${MAIL_HOSTNAME:-}
+      MAIL_COPY_TO: ${MAIL_COPY_TO-copy@mailpit.internal}
+    volumes:
+      - mail_dkim:/etc/opendkim/keys     # DKIM private key (keep it: the DNS record depends on it)
+      - mail_spool:/var/spool/postfix    # queued mail survives restarts
+    restart: unless-stopped
+    networks:
+      - bintalk_network
+
+  # Mailpit: inbox for copies of all outgoing email (web UI at http://localhost:8025). It holds
+  # password reset links, so it is only reachable from this machine; production disables the copy.
+  mailpit:
+    image: axllent/mailpit:v1.29
+    container_name: bintalk_mailpit
+    ports:
+      - "127.0.0.1:8025:8025"
+    restart: unless-stopped
+    networks:
+      - bintalk_network
+
+  # API Gateway (Nginx)
+  api-gateway:
+    image: nginx:alpine
+    container_name: bintalk_api_gateway
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/snippets:/etc/nginx/snippets:ro
+      - ./certs:/etc/nginx/certs:ro
+      - ./web:/usr/share/nginx/html:ro
+    depends_on:
+      - api-server
+    networks:
+      - bintalk_network
+
+  # The API runs as a non-root user (uid 10001). Earlier versions ran as root, so this one-shot
+  # service hands existing uploads over to that user before the API starts.
+  uploads-permissions:
+    image: alpine:3.24
+    container_name: bintalk_uploads_permissions
+    command: ["chown", "-R", "10001:10001", "/data/uploads"]
+    volumes:
+      - uploads_data:/data/uploads
+    restart: "no"
+
+  # Go API Server (not published: clients go through the gateway, which sets the client IP)
+  api-server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: bintalk_api_server
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: bintalk
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      DB_NAME: bintalk_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+      KAFKA_BROKERS: kafka:29092
+      VAULT_ADDR: http://vault:8200
+      # Written by vault/bootstrap.sh; limited to the bintalk-api policy (vault/policy.hcl).
+      VAULT_TOKEN_FILE: /run/vault/token
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      TLS_CERT_FILE: /app/certs/server.crt
+      TLS_KEY_FILE: /app/certs/server.key
+      UPLOAD_DIR: /data/uploads
+      # Requests per minute per client IP. All local browsers share one IP, and live updates
+      # make several requests per message, so development needs more headroom than 100.
+      RATE_LIMIT_REQUESTS: "600"
+      # Email (password resets) goes through the local mail server (service "postfix"), which
+      # delivers directly to recipients' mail servers. See the "Email" section of .env.
+      SMTP_HOST: ${SMTP_HOST:-postfix}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-no-reply@${MAIL_DOMAIN:-bintalk.local}}
+      # Largest upload in MB (audio/video attachments)
+      MAX_REQUEST_SIZE: "50"
+      APP_BASE_URL: ${APP_BASE_URL:-https://localhost}
+      ENVIRONMENT: development
+      # Company subscriptions paid with Chapa (https://dashboard.chapa.co). Without a secret key,
+      # new companies wait for a platform admin's approval instead of paying online.
+      CHAPA_SECRET_KEY: ${CHAPA_SECRET_KEY:-}
+      CHAPA_WEBHOOK_SECRET: ${CHAPA_WEBHOOK_SECRET:-}
+      CHAPA_BASE_URL: ${CHAPA_BASE_URL:-}
+      COMPANY_REQUIRE_APPROVAL: ${COMPANY_REQUIRE_APPROVAL:-false}
+      SUBSCRIPTION_GRACE_DAYS: ${SUBSCRIPTION_GRACE_DAYS:-3}
+      # Calls between different networks need a TURN relay (see README)
+      TURN_URLS: ${TURN_URLS:-}
+      TURN_USERNAME: ${TURN_USERNAME:-}
+      TURN_PASSWORD: ${TURN_PASSWORD:-}
+      # First platform admin, created on startup if no admin exists and no account uses this email
+      # yet (must change password at first sign-in). Set BOOTSTRAP_ADMIN_PASSWORD in .env.
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-admin@bintalk.local}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+    depends_on:
+      uploads-permissions:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+    volumes:
+      - ./certs:/app/certs:ro
+      - uploads_data:/data/uploads
+      - vault_app_token:/run/vault:ro
+    networks:
+      - bintalk_network
+    restart: unless-stopped
+
+networks:
+  bintalk_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  vault_data:
+  vault_keys:
+  vault_app_token:
+  uploads_data:
+  mail_dkim:
+  mail_spool:

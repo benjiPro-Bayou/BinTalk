@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - name: Vet
+        run: go vet ./...
+      - name: Test (race detector)
+        run: go test -race -count=1 ./...
+      - name: Lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: latest
+          working-directory: backend
+
+  # Vulnerability scan with the same toolchain as the shipped image, so standard-library
+  # results match the binary.
+  govulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: govulncheck in the builder image
+        run: |
+          docker run --rm -v "$PWD/backend:/src" -w /src \
+            "$(sed -n 's/^FROM \(golang:[^ ]*\).*/\1/p' backend/Dockerfile)" \
+            sh -c 'go run golang.org/x/vuln/cmd/govulncheck@latest ./...'
+
+  web-and-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Web client syntax
+        run: node --check web/app.js
+      - name: Compose files
+        env:
+          DB_PASSWORD: ci
+          REDIS_PASSWORD: ci
+          APP_BASE_URL: https://ci.example
+          CORS_ALLOWED_ORIGINS: https://ci.example
+        run: |
+          docker compose config --quiet
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml config --quiet
+      - name: Shell scripts
+        run: bash -n scripts/*.sh && sh -n vault/bootstrap.sh mail/entrypoint.sh

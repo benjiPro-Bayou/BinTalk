@@ -1,0 +1,8 @@
+.git
+*.md
+*.test
+*.out
+coverage*
+.env
+.env.*
+certs/
